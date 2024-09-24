@@ -7,12 +7,77 @@
 
 import SwiftUI
 
-struct WelcomeView: View {
+@MainActor
+protocol WelcomeViewModel: BaseViewModel {
+    
+}
+
+class WelcomeViewModelImpl: BaseViewModelImpl, WelcomeViewModel {
+    
+    init(
+        with router: ScreenFactory.Router
+    ) {
+        super.init(router: router)
+    }
+    
+
+    override func onFirstAppear() {
+        super.onFirstAppear()
+    }
+}
+
+struct WelcomeView<ViewModel: WelcomeViewModel>: View {
+    
+    @StateObject var vm: ViewModel
+      
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            Image("background", bundle: .main)
+                .resizable()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                Text("SwiftUI Fantasy")
+                    .foregroundColor(.white)
+                    .font(.largeTitle.italic())
+                    .bold()
+                    .padding(.top, 50)
+                
+                Spacer(minLength: 30)
+                Button(action: {
+                    vm.router.push(.loginScreen)
+                }, label: {
+                    Text("Sign In with Email")
+                        .font(.title3).bold()
+                        .foregroundColor(.white)
+                        .frame(height: 60)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.yellow.opacity(0.8))
+                        .cornerRadius(30)
+                })
+                
+                Button(action: {
+                    vm.router.push(.signUpScreen)
+                }, label: {
+                    Text("Sign Up")
+                        .font(.title3).bold()
+                        .foregroundColor(.white)
+                        .frame(height: 60)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.yellow.opacity(0.8))
+                        .cornerRadius(30)
+                })
+                .padding(.bottom,20)
+                
+            }
+            .padding(.horizontal, 10)
+        }
+        .navigationBarHidden(true)
+       
     }
 }
 
 #Preview {
-    WelcomeView()
+    WelcomeView(vm: WelcomeViewModelImpl(with: ScreenFactory.Router())) // Correct initialization
 }

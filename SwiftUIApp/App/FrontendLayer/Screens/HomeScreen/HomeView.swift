@@ -7,12 +7,32 @@
 
 import SwiftUI
 
-struct HomeView: View {
+protocol HomeViewViewModel: BaseViewModel {
+    
+}
+
+class HomeViewViewModelImpl: BaseViewModelImpl, HomeViewViewModel {
+    
+    init(with router: ScreenFactory.Router) {
+        super.init(router: router)
+    }
+}
+
+
+struct HomeView<ViewModel: HomeViewViewModel>: View {
+    
+    @StateObject var vm: ViewModel
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(alignment: .center, content: {
+            Text("Welcome to SwiftUI Fantasy")
+                .foregroundColor(.black)
+                .font(.title)
+                .padding()
+        })
+
     }
 }
 
 #Preview {
-    HomeView()
+    HomeView(vm: HomeViewViewModelImpl(with: ScreenFactory.Router()))
 }

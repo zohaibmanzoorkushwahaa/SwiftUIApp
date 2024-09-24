@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import FirebaseCore
 
 class AppDelegate: NSObject {
     // MARK: Properties
@@ -18,7 +19,7 @@ extension AppDelegate: UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-     
+        FirebaseApp.configure()
         return true
     }
 }

@@ -13,7 +13,10 @@ enum ScreenFactory: Equatable {
     typealias Host = UIPilotHost
     typealias Router = UIPilot<ScreenFactory>
     
+    case welcomeScreen
+    case signUpScreen
     case loginScreen
+    case homeScreen
 }
 
 
@@ -26,8 +29,30 @@ extension ScreenFactory {
     ) -> some View {
         switch self {
         
-        case .loginScreen: 
-            ContentView()
+        case .welcomeScreen:
+            let welcomeViewModel = WelcomeViewModelImpl(
+                with: router
+            )
+            WelcomeView(vm: welcomeViewModel)
+            
+        case .signUpScreen:
+            
+            SignUpView(
+                vm: SignUpViewModelImpl(
+                    with: router
+                )
+            )
+        case .loginScreen:
+            let loginViewModel = LoginViewModelImpl(router: router)
+            LoginInView(vm: loginViewModel)
+            
+        case .homeScreen:
+            
+            HomeView(
+                vm: HomeViewViewModelImpl(
+                    with: router
+                )
+            )
         
         }
     }
