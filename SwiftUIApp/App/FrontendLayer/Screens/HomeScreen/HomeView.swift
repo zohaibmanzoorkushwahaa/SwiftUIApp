@@ -23,13 +23,25 @@ struct HomeView<ViewModel: HomeViewViewModel>: View {
     
     @StateObject var vm: ViewModel
     var body: some View {
+        
         VStack(alignment: .center, content: {
             Text("Welcome to SwiftUI Fantasy")
                 .foregroundColor(.black)
                 .font(.title)
                 .padding()
         })
+        .navigationBarBackButtonHidden()
+        .navigationBarItems(trailing: buttonLogout)
+        
 
+    }
+    
+    var buttonLogout: some View {
+        Button("", systemImage: "gearshape") {
+            vm.router.push(.settingScreen)
+        }
+        .foregroundColor(.blue)
+        
     }
 }
 

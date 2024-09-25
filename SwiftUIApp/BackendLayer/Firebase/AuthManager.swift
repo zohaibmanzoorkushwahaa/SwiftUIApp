@@ -62,10 +62,49 @@ class AuthManager: ObservableObject {
       
     }
     
-    func loginUser() async throws {
+    @discardableResult
+    func loginUser(email: String, password: String) async throws -> Bool  {
     
-        let result = try await Auth.auth().signIn(withEmail: "", password: "")
+        do {
+            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            
+            return true
+        } catch {
+            debugPrint("unable to login, \(error.localizedDescription)")
+            throw(error)
+        }
+
+    }
+    
+    func logoutUser() throws {
+        do {
+            try Auth.auth().signOut()
+        } catch {
+            throw(error)
+        }
+    }
+    
+    func resetPassword(email: String) async throws {
         
+       try await Auth.auth().sendPasswordReset(withEmail: email)
+    }
+    
+    func updatePassword(password: String) async throws {
+        
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.badServerResponse)
+        }
+        
+        try await user.updatePassword(to: password)
+    }
+    
+    func updateEmail(email: String) async throws {
+        
+        guard let user = Auth.auth().currentUser else {
+            throw URLError(.badServerResponse)
+        }
+        
+        try await user.updateEmail(to: email)
     }
     
     func setUserData(id: String, name: String, email: String, phoneNo: String, photoURL: String) async throws {

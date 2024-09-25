@@ -145,19 +145,27 @@ struct SignUpView<ViewModel: SignUpViewModel>: View {
                                 .background(Color.black.opacity(0.8))
                                 .cornerRadius(10)
                         }
-
-                        
-                        
-                        
-                        
+ 
                     }
                     .padding(.horizontal, 15)
                     
                 }
             }
         }
+        .navigationBarBackButtonHidden()
+        .navigationBarItems(leading: backButton)
     
         
+    }
+}
+
+extension SignUpView {
+    
+    var backButton: some View {
+        Button("Back", systemImage: "arrow.backward") {
+            vm.router.pop()
+        }
+        .foregroundColor(.black)
     }
 }
 

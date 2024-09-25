@@ -26,7 +26,11 @@ class LoginViewModelImpl: BaseViewModelImpl, LoginViewModel {
         
         Task {
             do {
-                let result: () = try await AuthManager.shared.loginUser()
+                let result = try await AuthManager.shared.loginUser(email: email, password: password)
+                if result {
+                    router.clearRoutes()
+                    router.push(.homeScreen)
+                }
                 print("Success")
                 print(result)
             } catch {
@@ -82,6 +86,7 @@ struct LoginInView<ViewModel: LoginViewModel>: View {
                         
                         Button(action: {
                             // Add button action here
+                            vm.signIn()
                         }, label: {
                             Text("Sign In")
                                 .foregroundColor(.white)
@@ -103,8 +108,18 @@ struct LoginInView<ViewModel: LoginViewModel>: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden()
+        .navigationBarItems(leading: backButton)
+    }
+}
+
+extension LoginInView {
     
-        
+    var backButton: some View {
+        Button("Back", systemImage: "arrow.backward") {
+            vm.router.pop()
+        }
+        .foregroundColor(.black)
     }
 }
 

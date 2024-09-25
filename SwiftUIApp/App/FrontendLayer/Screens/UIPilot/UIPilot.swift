@@ -70,6 +70,20 @@ public class UIPilot<T: Equatable>: ObservableObject {
             logger.log("UIPilot - \(popped) route popped by system")
         }
     }
+    
+    public func clearRoutes(animated: Bool = true) {
+        guard !_routes.isEmpty else {
+            logger.log("UIPilot - No routes to pop.")
+            return
+        }
+        
+        let rootRoute = _routes.first!
+        logger.log("UIPilot - Popping to root route: \(rootRoute).")
+        
+        // Clear all routes except the root
+        _routes = []
+    }
+    
 }
 
 public struct UIPilotHost<T: Equatable, Screen: View>: View {

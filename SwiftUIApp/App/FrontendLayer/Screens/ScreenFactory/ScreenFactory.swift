@@ -17,6 +17,7 @@ enum ScreenFactory: Equatable {
     case signUpScreen
     case loginScreen
     case homeScreen
+    case settingScreen
 }
 
 
@@ -42,6 +43,8 @@ extension ScreenFactory {
                     with: router
                 )
             )
+        case .settingScreen:
+            SettingsView(vm: SettingViewModelImpl(with: router))
         case .loginScreen:
             let loginViewModel = LoginViewModelImpl(router: router)
             LoginInView(vm: loginViewModel)
@@ -59,6 +62,13 @@ extension ScreenFactory {
 }
 
 //extension ScreenFactory.Router {
+//    func logout() {
+//        popToRoot(animated: false) // Optionally clear the stack
+//        push(.welcomeScreen)// Push welcome screen
+//    }
+//}
+
+//extension ScreenFactory.Router {
 //    @discardableResult
 //    func openAppSettings() -> Succeed {
 //        guard
@@ -72,4 +82,5 @@ extension ScreenFactory {
 //        return true
 //    }
 //}
+
 
