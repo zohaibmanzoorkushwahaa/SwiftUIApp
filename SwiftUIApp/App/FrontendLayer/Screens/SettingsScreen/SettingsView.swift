@@ -8,15 +8,25 @@
 import SwiftUI
 
 protocol SettingsViewModel: BaseViewModel {
+    var authProviders: [AuthProviderOption] { get set }
+    
     func logout()
     
     func resetPassword() async throws -> Bool
+    func loadAuthProviders()
 }
 
 class SettingViewModelImpl: BaseViewModelImpl, SettingsViewModel {
     
+    @Published var authProviders: [AuthProviderOption] = []
+    
     init(with router: ScreenFactory.Router) {
         super.init(router: router)
+    }
+    
+    func loadAuthProviders() {
+
+        authProviders = AuthManager.shared.getProvider()
     }
     
     func logout() {
@@ -45,6 +55,8 @@ class SettingViewModelImpl: BaseViewModelImpl, SettingsViewModel {
         
         try await AuthManager.shared.updatePassword(password: pass)
     }
+    
+    
 }
 
 struct SettingsView<ViewModel: SettingsViewModel>: View {
@@ -55,37 +67,37 @@ struct SettingsView<ViewModel: SettingsViewModel>: View {
     
     var body: some View {
         List {
-            Section {
-                Button("Reset Password") {
-                    Task {
-                        do {
-                            let result = try await vm.resetPassword()
-                            
-                            if result {
-                                // If the reset is successful, show an alert
-                                alertMessage = "Reset password link has been sent to your email."
+            if vm.authProviders.contains(.email) {
+                Section {
+                    Button("Reset Password") {
+                        Task {
+                            do {
+                                let result = try await vm.resetPassword()
+                                
+                                if result {
+                                    // If the reset is successful, show an alert
+                                    alertMessage = "Reset password link has been sent to your email."
+                                    showAlert = true
+                                }
+                            } catch {
+                                // Handle errors and show an alert if necessary
+                                alertMessage = "Failed to send reset password link."
                                 showAlert = true
                             }
-                        } catch {
-                            // Handle errors and show an alert if necessary
-                            alertMessage = "Failed to send reset password link."
-                            showAlert = true
                         }
                     }
+                    
+                    Button("Update Password") {
+                        //TODO: GO TO Update PassScreen
+                    }
+                    
+                    Button("Update Email") {
+                        //TODO: GO TO Update Email
+                    }
+                } header: {
+                    Text("Email Functions")
                 }
-                
-                Button("Update Password") {
-                    //TODO: GO TO Update PassScreen
-                }
-                
-                Button("Update Email") {
-                    //TODO: GO TO Update Email
-                }
-            } header: {
-                Text("Email Functions")
             }
-            
-            
             
             Section {
                 Button("Logout") {
@@ -105,6 +117,9 @@ struct SettingsView<ViewModel: SettingsViewModel>: View {
         .navigationTitle("Settings")
         .navigationBarBackButtonHidden()
         .navigationBarItems(leading: backButton)
+        .onAppear {
+            vm.loadAuthProviders()
+        }
     }
 }
 

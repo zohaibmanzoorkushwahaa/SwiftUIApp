@@ -32,6 +32,9 @@ struct HomeView<ViewModel: HomeViewViewModel>: View {
         })
         .navigationBarBackButtonHidden()
         .navigationBarItems(trailing: buttonLogout)
+        .onAppear {
+            try? AuthManager.shared.getProvider()
+        }
         
 
     }

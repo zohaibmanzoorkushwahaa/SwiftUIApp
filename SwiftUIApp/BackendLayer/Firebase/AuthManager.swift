@@ -16,6 +16,12 @@ enum AuthState {
     case signedOut // Not authenticated in Firebase.
 }
 
+enum AuthProviderOption: String {
+    
+    case email = "password"
+    case googlle = "google.com"
+}
+
 struct AuthDataResultModel {
     var uid: String
     var name: String?
@@ -46,6 +52,55 @@ class AuthManager: ObservableObject {
         return (true, AuthDataResultModel(user: user))
     }
     
+    func getProvider() -> [AuthProviderOption] {
+        guard let providerData = Auth.auth().currentUser?.providerData else {
+            return []
+        }
+        
+        var providers: [AuthProviderOption] = []
+        for provider in providerData {
+          
+            if let option = AuthProviderOption(rawValue: provider.providerID) {
+                providers.append(option)
+            } else {
+                assertionFailure("Provider Option not found \(provider.providerID)")
+            }
+        }
+        
+        return providers
+    }
+ 
+    
+    func setUserData(id: String, name: String, email: String, phoneNo: String, photoURL: String) async throws {
+           let db = Firestore.firestore()
+           
+           do {
+               try await db.collection("users") // Replace "users" with your collection name
+                   .document(id) // Use the uid of the user
+                   .setData([
+                       "name": name ,
+                       "email": email ,
+                       "phoneNo": phoneNo,
+                       "photoURL": photoURL
+                   ])
+           } catch {
+               print(error.localizedDescription)
+               throw error // Re-throw the error to let the caller handle it
+           }
+    }
+    
+    
+    func logoutUser() throws {
+        do {
+            try Auth.auth().signOut()
+        } catch {
+            throw(error)
+        }
+    }
+}
+
+//MARK: - SIGN IN EMAIL
+extension AuthManager {
     func createUser(email: String, pasword: String, phonoNo: String, name: String) async throws ->  AuthDataResultModel {
         do {
            let result =  try await Auth.auth().createUser(withEmail: email, password: pasword)
@@ -66,7 +121,7 @@ class AuthManager: ObservableObject {
     func loginUser(email: String, password: String) async throws -> Bool  {
     
         do {
-            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            let _ = try await Auth.auth().signIn(withEmail: email, password: password)
             
             return true
         } catch {
@@ -74,14 +129,6 @@ class AuthManager: ObservableObject {
             throw(error)
         }
 
-    }
-    
-    func logoutUser() throws {
-        do {
-            try Auth.auth().signOut()
-        } catch {
-            throw(error)
-        }
     }
     
     func resetPassword(email: String) async throws {
@@ -106,22 +153,22 @@ class AuthManager: ObservableObject {
         
         try await user.updateEmail(to: email)
     }
+}
+
+//MARK: - SIGN IN SSO
+extension AuthManager {
+    @discardableResult
+    func signInWithGoogle(tokens: GoogleSignResultModel) async throws -> AuthDataResultModel {
+        
+        let credential = GoogleAuthProvider.credential(
+            withIDToken: tokens.idToken,
+            accessToken: tokens.accessToken
+        )
+        return try await signIn(credential: credential)
+    }
     
-    func setUserData(id: String, name: String, email: String, phoneNo: String, photoURL: String) async throws {
-           let db = Firestore.firestore()
-           
-           do {
-               try await db.collection("users") // Replace "users" with your collection name
-                   .document(id) // Use the uid of the user
-                   .setData([
-                       "name": name ,
-                       "email": email ,
-                       "phoneNo": phoneNo,
-                       "photoURL": photoURL
-                   ])
-           } catch {
-               print(error.localizedDescription)
-               throw error // Re-throw the error to let the caller handle it
-           }
-       }
+    func signIn(credential: AuthCredential) async throws -> AuthDataResultModel {
+        let result = try await Auth.auth().signIn(with: credential)
+        return AuthDataResultModel(user: result.user)
+    }
 }
